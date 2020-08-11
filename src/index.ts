@@ -56,11 +56,16 @@ async function main() {
 
   switch (choice) {
     case "show": {
-      console.log(
-        Array.from(devices)
-          .map((d, i) => `${i + 1}="${d}"`)
-          .join(" | ")
-      );
+      if (devices.size) {
+        console.log(
+          Array.from(devices)
+            .map((d, i) => `${i + 1}="${d}"`)
+            .join(" | ")
+        );
+      } else {
+        console.log("No devices connected!");
+      }
+
       break;
     }
     case "open": {
