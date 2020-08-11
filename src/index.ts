@@ -10,7 +10,7 @@ import { openPhone } from "./phone";
 
 const devices = new Set<string>();
 
-const adb = resolve(process.cwd(), "./scrcpy/adb.exe");
+const adb = `${resolve(process.cwd(), "./scrcpy/adb.exe")}`;
 
 const isReady = (() => {
   let resolve: () => void = undefined as any;
@@ -28,13 +28,15 @@ const startAdb = spawn(adb, ["start-server"], {
   stdio: "ignore",
 });
 
+startAdb.stderr?.pipe(process.stderr);
+
 startAdb.on("error", () => {});
 
 startAdb.on("close", (code) => {
   if (code === 0) {
     isReady.resolve();
   } else {
-    console.error("adb couldn't be started properly, make sure to have it installed.".red.bgBlack);
+    console.error("adb couldn't be started properly".red.bgBlack);
     setTimeout(() => {
       process.exit(1);
     }, 5000);
@@ -142,7 +144,7 @@ let configPromise = readConfig();
       }
       case "auto": {
         if (config.autoOpenWindows) {
-          console.log("Now the application is manually phone windows");
+          console.log("Now you have to manually open phone windows");
         } else {
           console.log(
             "Now the application is automatically opening windows on new phones connected."
