@@ -15,8 +15,8 @@ export interface Config {
 const defaultConfig: Config = {
   autoOpenWindows: true,
   orientation: "horizontal",
-  borderless: true,
-  fullscreen: true,
+  borderless: false,
+  fullscreen: false,
 };
 
 const configFileLocation = resolve(process.cwd(), "./stream-phones-config.json");
