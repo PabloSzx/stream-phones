@@ -13,5 +13,5 @@ declare module "adbkit" {
       };
     }>;
   }
-  export function createClient(): Client;
+  export function createClient(options?: { port?: number; host?: string; bin?: string }): Client;
 }

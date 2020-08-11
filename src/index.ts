@@ -3,11 +3,14 @@ import "colors";
 import { createClient } from "adbkit";
 import { spawn } from "child_process";
 import { prompt } from "inquirer";
+import { resolve } from "path";
 
 import { readConfig, writeConfig } from "./config";
 import { openPhone } from "./phone";
 
 const devices = new Set<string>();
+
+const adb = resolve(process.cwd(), "./scrcpy/adb.exe");
 
 const isReady = (() => {
   let resolve: () => void = undefined as any;
@@ -21,7 +24,7 @@ const isReady = (() => {
   };
 })();
 
-const startAdb = spawn("adb", ["start-server"], {
+const startAdb = spawn(adb, ["start-server"], {
   stdio: "ignore",
 });
 
@@ -43,7 +46,9 @@ let configPromise = readConfig();
 (async () => {
   await isReady.promise;
 
-  const client = createClient();
+  const client = createClient({
+    bin: adb,
+  });
 
   client.listDevices().then((devicesList) => {
     for (const dev of devicesList) {

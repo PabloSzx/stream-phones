@@ -3,13 +3,13 @@ import { resolve } from "path";
 
 import type { Config } from "./config";
 
-const location = resolve(process.cwd(), "./scrcpy/scrcpy.exe");
+const scrcpyExe = resolve(process.cwd(), "./scrcpy/scrcpy.exe");
 
-console.log(location);
+console.log(scrcpyExe);
 
 export const openPhone = (device: string, config: Config) => {
   return spawn(
-    `${location} -b 100M -s ${device} --lock-video-orientation ${
+    `${scrcpyExe} -b 100M -s ${device} --lock-video-orientation ${
       config.orientation === "horizontal" ? 1 : 0
     } -w ${config.borderless ? "--window-borderless" : ""} ${
       config.fullscreen ? "--fullscreen" : ""
