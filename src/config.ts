@@ -10,6 +10,7 @@ export interface Config {
   orientation: "vertical" | "horizontal";
   borderless: boolean;
   fullscreen: boolean;
+  bitRate: number;
 }
 
 const defaultConfig: Config = {
@@ -17,6 +18,11 @@ const defaultConfig: Config = {
   orientation: "horizontal",
   borderless: false,
   fullscreen: false,
+  bitRate: 20,
+};
+
+export const currentConfig = {
+  config: defaultConfig,
 };
 
 const configFileLocation = resolve(process.cwd(), "./stream-phones-config.json");
@@ -31,11 +37,12 @@ export const readConfig = async () => {
       typeof config?.autoOpenWindows !== "boolean" ||
       (config.orientation !== "horizontal" && config.orientation !== "vertical") ||
       typeof config.borderless !== "boolean" ||
-      typeof config.fullscreen !== "boolean"
+      typeof config.fullscreen !== "boolean" ||
+      typeof config.bitRate !== "number"
     ) {
       throw Error("Rewrite config");
     }
-
+    currentConfig.config = config;
     return config;
   } catch (err) {
     return writeConfig();
@@ -44,6 +51,7 @@ export const readConfig = async () => {
 
 export const writeConfig = async (config: Config = defaultConfig) => {
   const configString = JSON.stringify(config, null, 2);
+  currentConfig.config = config;
   await writeFile(configFileLocation, configString, {
     encoding: "utf-8",
   });

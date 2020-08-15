@@ -1,16 +1,17 @@
 import { spawn } from "child_process";
 import { resolve } from "path";
 
-import type { Config } from "./config";
+import { currentConfig } from "./config";
 
 const scrcpyExe = resolve(process.cwd(), "./scrcpy/scrcpy.exe");
 
-export const openPhone = (device: string, config: Config) => {
+export const openPhone = (device: string) => {
+  const config = currentConfig.config;
   const p = spawn(
     `"${scrcpyExe}"`,
     [
       "-b",
-      "100M",
+      `${config.bitRate}M`,
       "-s",
       device,
       "--lock-video-orientation",

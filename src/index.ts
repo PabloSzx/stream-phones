@@ -1,12 +1,14 @@
 import "colors";
+import "./ui";
 
 import { createClient } from "adbkit";
 import { spawn } from "child_process";
-import { prompt } from "inquirer";
+import toInteger from "lodash/toInteger";
 import { resolve } from "path";
 
-import { readConfig, writeConfig } from "./config";
+import { currentConfig, writeConfig } from "./config";
 import { openPhone } from "./phone";
+import { askChoices, askPrompt, setWindowData } from "./ui";
 
 const devices = new Set<string>();
 
@@ -43,8 +45,6 @@ startAdb.on("close", (code) => {
   }
 });
 
-let configPromise = readConfig();
-
 (async () => {
   await isReady.promise;
 
@@ -60,9 +60,9 @@ let configPromise = readConfig();
 
   client.trackDevices().then((tracker) => {
     tracker.on("add", async (device) => {
-      const config = await configPromise;
+      const config = currentConfig.config;
       if (config.autoOpenWindows) {
-        openPhone(device.id, config);
+        openPhone(device.id);
       }
       devices.add(device.id);
     });
@@ -72,47 +72,8 @@ let configPromise = readConfig();
   });
 
   async function main() {
-    const config = await configPromise;
-    console.log("\n");
-    const { choice } = await prompt([
-      {
-        type: "list",
-        name: "choice",
-        message: "What do you want to do?",
-        choices: [
-          {
-            name: "Show devices connected",
-            value: "show",
-          },
-          {
-            name: "Open windows",
-            value: "open",
-          },
-          {
-            name: config.autoOpenWindows
-              ? "Automatically opening windows on connected phone"
-              : "Manually opening windows",
-            value: "auto",
-          },
-          {
-            name: config.orientation === "horizontal" ? "Horizontal windows" : "Vertical windows",
-            value: "orientation",
-          },
-          {
-            name: config.borderless ? "Borderless windows" : "Windows with borders",
-            value: "borderless",
-          },
-          {
-            name: config.fullscreen ? "Fullscreen windows" : "No fullscreen windows",
-            value: "fullscreen",
-          },
-          {
-            name: "Exit".red.bgBlack,
-            value: "exit",
-          },
-        ],
-      },
-    ]);
+    const choice = await askChoices();
+    const config = currentConfig.config;
 
     switch (choice) {
       case "show": {
@@ -122,20 +83,20 @@ let configPromise = readConfig();
           }
         });
         if (devices.size) {
-          console.log(
+          setWindowData(
             Array.from(devices)
-              .map((d, i) => `${i + 1}="${d}"`.bgBlack.white)
+              .map((d, i) => `${(i + 1).toString().yellow.bgBlack}="${d.magenta.bgWhite}"`)
               .join(" | ")
           );
         } else {
-          console.log("No devices connected!".magenta.bgWhite);
+          setWindowData("No devices connected!".magenta.bgWhite);
         }
 
         break;
       }
       case "open": {
         devices.forEach((device) => {
-          openPhone(device, config);
+          openPhone(device);
         });
         break;
       }
@@ -143,10 +104,10 @@ let configPromise = readConfig();
         process.exit(0);
       }
       case "auto": {
-        if (config.autoOpenWindows) {
-          console.log("Now you have to manually open phone windows");
+        if (currentConfig.config.autoOpenWindows) {
+          setWindowData("Now you have to manually open phone windows");
         } else {
-          console.log(
+          setWindowData(
             "Now the application is automatically opening windows on new phones connected."
           );
         }
@@ -155,7 +116,7 @@ let configPromise = readConfig();
         break;
       }
       case "orientation": {
-        console.log(
+        setWindowData(
           config.orientation === "horizontal"
             ? "The windows will be vertical"
             : "The windows will be horizontal"
@@ -164,23 +125,30 @@ let configPromise = readConfig();
         break;
       }
       case "borderless": {
-        console.log(
+        setWindowData(
           config.borderless ? "Windows will have borders" : "The windows will be borderless"
         );
         config.borderless = !config.borderless;
         break;
       }
       case "fullscreen": {
-        console.log(
+        setWindowData(
           config.fullscreen ? "The windows won't be fullscreen" : "The windows will be fullscreen"
         );
         config.fullscreen = !config.fullscreen;
         break;
       }
+      case "bitRate": {
+        const bitRateInt = toInteger(await askPrompt("Set a bitrate in Mbps (1 <= x <= 100)"));
+        const bitRate = bitRateInt > 100 ? 100 : bitRateInt < 1 ? 1 : bitRateInt;
+
+        setWindowData(`bitRate set to ${bitRate} Mbps`);
+        config.bitRate = bitRate;
+        break;
+      }
     }
 
-    configPromise = writeConfig(config);
-
+    writeConfig(config).catch(console.error);
     main();
   }
 
