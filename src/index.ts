@@ -161,7 +161,7 @@ startAdb.on("close", (code) => {
       }
     }
 
-    writeConfig(config).catch(console.error);
+    await writeConfig(config);
     main();
   }
 
