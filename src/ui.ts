@@ -73,7 +73,6 @@ const list = blessed.list({
       bold: true,
     },
   },
-  tags: true,
   vi: true,
   keys: true,
   mouse: true,
@@ -81,11 +80,12 @@ const list = blessed.list({
 
 const data = blessed.box({
   parent: screen,
-  top: "center",
+  bottom: 0,
   left: "center",
   height: "50%",
   width: "50%",
   align: "center",
+  valign: "middle",
   border: {
     type: "line",
   },
@@ -94,10 +94,11 @@ const data = blessed.box({
 
 const prompt = blessed.prompt({
   parent: screen,
-  top: "center",
+  bottom: 0,
   left: "center",
-  height: "shrink",
-  width: "shrink",
+  height: "50%",
+  width: "50%",
+  align: "center",
   keys: true,
   vi: true,
   mouse: true,

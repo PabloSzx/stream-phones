@@ -84,9 +84,22 @@ startAdb.on("close", (code) => {
         });
         if (devices.size) {
           setWindowData(
-            Array.from(devices)
-              .map((d, i) => `${(i + 1).toString().yellow.bgBlack}="${d.magenta.bgWhite}"`)
-              .join(" | ")
+            (
+              await Promise.all(
+                Array.from(devices).map(async (serial, i) => {
+                  const properties = await client.getProperties(serial);
+                  return `${(i + 1).toString().yellow.bgBlack}: Serial="${
+                    serial.magenta.bgWhite
+                  }" Model="${
+                    (
+                      (properties["ro.product.manufacturer"] || "") +
+                      " " +
+                      properties["ro.product.model"]
+                    ).trim().cyan.bgMagenta
+                  }"`;
+                })
+              )
+            ).join("\n\n")
           );
         } else {
           setWindowData("No devices connected!".magenta.bgWhite);

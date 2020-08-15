@@ -12,6 +12,7 @@ declare module "adbkit" {
         (type: "end", cb: () => void): void;
       };
     }>;
+    getProperties(serial: string): Promise<Record<string, string>>;
   }
   export function createClient(options?: { port?: number; host?: string; bin?: string }): Client;
 }
