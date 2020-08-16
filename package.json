@@ -8,6 +8,7 @@
     "prepare": "tsc",
     "start": "tsc && node dist/index.js"
   },
+  "pkg": { "assets": "node_modules/blessed/**/*" },
   "dependencies": {
     "adbkit": "^2.11.1",
     "blessed": "^0.1.81",
